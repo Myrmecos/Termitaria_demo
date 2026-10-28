@@ -5,7 +5,8 @@
   "scripts": {
     "record": "node record.mjs",
     "record:autoresearch": "node record-autoresearch.mjs",
-    "record:market": "node record-market.mjs"
+    "record:market": "node record-market.mjs",
+    "cut": "node cut.mjs"
   },
   "dependencies": {
     "playwright": "^1.56.1"

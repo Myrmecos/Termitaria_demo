@@ -1,0 +1,89 @@
+{
+  "source": "artifacts/autoresearch_2026-10-28_11_41.webm",
+  "clips": [
+    {
+      "id": "01-create",
+      "ranges": [
+        {
+          "start": 5.6,
+          "end": 9.4,
+          "lines": [
+            "To create a project with the specialized team,",
+            "click the \"add\" icon, name your project."
+          ]
+        },
+        {
+          "start": 11.2,
+          "end": 13.8,
+          "lines": [
+            "Pick a template that suits your work's need,",
+            "or edit the team yourself."
+          ]
+        },
+        {
+          "start": 23.8,
+          "end": 27.8,
+          "text": "Then create the project"
+        },
+        {
+          "start": 34.2,
+          "end": 37.4,
+          "text": "and assign the work to the team leader,"
+        },
+        {
+          "start": 42.0,
+          "end": 45.2,
+          "text": "and let it coordinate the team for you."
+        }
+      ]
+    },
+    {
+      "id": "02-chat",
+      "ranges": [
+        {
+          "start": 49.8,
+          "end": 51.6,
+          "text": "To ask during the work, open one agent's private chat"
+        },
+        {
+          "start": 54.6,
+          "end": 57.4,
+          "text": "and send a message."
+        },
+        {
+          "start": 58.0,
+          "end": 61.0,
+          "lines": [
+            "Here, the user asks the Literature Collector",
+            "how many papers were inspected,",
+            "and what the major sources are."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "03-knowledge",
+      "ranges": [
+        {
+          "start": 68.9,
+          "end": 73.4,
+          "text": "Click \"knowledge\" icon to visualize the project's knowledge graph."
+        }
+      ]
+    },
+    {
+      "id": "04-artifacts",
+      "ranges": [
+        {
+          "start": 64.7,
+          "end": 68.9,
+          "lines": [
+            "We may also want the agents to summarize their work",
+            "as some deliverables.",
+            "Open \"Artifacts\" for the reports and decks from the team."
+          ]
+        }
+      ]
+    }
+  ]
+}
