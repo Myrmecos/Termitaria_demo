@@ -1,6 +1,7 @@
 import { chromium } from "playwright";
 import { access, mkdir, rename } from "node:fs/promises";
 import { dummyReplies } from "./dummy-replies.mjs";
+import { prepareReplay } from "./replay.mjs";
 
 const appUrl = process.env.DEMO_APP_URL || "http://127.0.0.1:3000";
 const recordVideo = process.env.DEMO_RECORD === "1";
@@ -263,6 +264,41 @@ export async function recordSession({
     if (labels.length) await pushPlan(labels, labels.length);
   }
 
+  async function openNamedChat(title) {
+    const row = page.locator("button.chat-row").filter({
+      has: page.locator("strong", { hasText: title === "General" ? /^General$/ : title }),
+    });
+    const ready = page.waitForResponse(
+      (res) => res.request().method() === "GET" && res.url().includes("/messages") && res.ok(),
+    );
+    await clickLocator(row);
+    await ready;
+    await page.getByLabel("Message").waitFor();
+  }
+
+  async function playPrivate(direct) {
+    await openNamedChat(direct.chatName);
+    await typeInto(page.getByLabel("Message"), direct.question.trim());
+    await clickLocator(page.getByRole("button", { name: "Send", exact: true }));
+    await page.locator(".thread .msg.user .bubble").filter({ hasText: direct.question.trim() }).waitFor();
+    await page.locator(".bubble.thinking").waitFor();
+    await page.waitForTimeout(2500);
+    await pushFrame({
+      type: "message.final",
+      chat_id: direct.agentId,
+      message: {
+        id: "m_dummy_private",
+        role: "agent",
+        text: direct.text,
+        created_at_ms: Date.now(),
+        agent_id: direct.agentId,
+        sender: direct.chatName,
+      },
+    });
+    await page.locator(".conversation .msg.agent .bubble").filter({ hasText: direct.mark }).waitFor();
+    await showReply();
+  }
+
   async function openNewProject() {
     const start = page.getByRole("button", { name: "New project" });
     const name = page.getByLabel("Project name");
@@ -350,6 +386,18 @@ export async function recordSession({
     step(chosen ? `model ${chosen}` : `model ${modelLabel} is not listed`);
   }
 
+  let createdProjectId = "";
+  page.on("response", async (response) => {
+    if (response.request().method() !== "POST" || !response.ok()) return;
+    if (!response.url().endsWith("/api/projects")) return;
+    try {
+      const body = await response.json();
+      if (body && body.id) createdProjectId = body.id;
+    } catch {
+      // A project response with no JSON body is not the create call.
+    }
+  });
+
   try {
     step(`open ${appUrl}`);
     await page.goto(appUrl, { waitUntil: "domcontentloaded" });
@@ -404,10 +452,28 @@ export async function recordSession({
     await settleReply();
     await showReply();
 
+    const saved = useDummy ? dummyReplies[recordingName] : null;
+    if (saved && saved.private) {
+      step(`ask ${saved.private.chatName}`);
+      await playPrivate(saved.private);
+    }
+    if (saved && saved.artifacts && saved.artifacts.length) {
+      if (!createdProjectId) throw new Error("the new project id was not captured");
+      step("inject artifacts and copy the knowledge graph");
+      const artifacts = await prepareReplay(createdProjectId, saved);
+      await pushFrame({ type: "artifact", artifacts });
+    }
+
     step("show artifacts and the knowledge graph");
     await clickLocator(page.getByRole("tab", { name: "Artifacts", exact: true }));
+    if (saved && saved.artifacts && saved.artifacts.length) {
+      await page.locator(".file-card").nth(saved.artifacts.length - 1).waitFor();
+    }
     await page.waitForTimeout(2500);
     await clickLocator(page.getByRole("tab", { name: "Knowledge", exact: true }));
+    if (saved && saved.replayProject) {
+      await page.getByText("Drag to move").waitFor();
+    }
     await page.waitForTimeout(2500);
     await clickLocator(page.getByRole("tab", { name: "Chats", exact: true }));
     await page.waitForTimeout(2000);

@@ -2,7 +2,7 @@ import { recordSession } from "./session.mjs";
 
 // examples/demos/autoresearch-demo.md
 await recordSession({
-  projectName: "Autoresearch Demo 1026",
+  projectName: "Autoresearch Demo",
   template: /autoresearch/i,
   evidence: `
 Research question: Does appending a short, definition-only glossary of terms taken from the passage increase claim-level faithfulness in biomedical question answering over MedQuAD, relative to an identical passage-only instruction? Faithfulness means each factual claim in the answer is supported by the passage.
